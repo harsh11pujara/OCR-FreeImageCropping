@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:ocr_image_cropping/free_crop.dart';
-import 'package:ocr_image_cropping/network_img_trial.dart';
 
 void main() {
   runApp( MaterialApp(home: FreeCrop(),));

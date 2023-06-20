@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:ocr_image_cropping/show_croped_image.dart';
 
 ///left top
 double px1 = 150;
@@ -32,8 +33,20 @@ double py7 = 300;
 double px8 = 450;
 double py8 = 150;
 
+class  extends StatelessWidget {
+  const ({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
+  }
+}
+
+
 class FreeCrop extends StatefulWidget {
-  const FreeCrop({Key? key}) : super(key: key);
+  final ValueChanged<Offset>? onChanged;
+
+  const FreeCrop({Key? key, this.onChanged}) : super(key: key);
 
   @override
   State<FreeCrop> createState() => _FreeCropState();
@@ -42,6 +55,7 @@ class FreeCrop extends StatefulWidget {
 class _FreeCropState extends State<FreeCrop> {
   final String imageURL = 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
   GlobalKey? cropperKey = GlobalKey();
+  Uint8List? image;
 
 
   Future<Uint8List?> crop({
@@ -63,19 +77,66 @@ class _FreeCropState extends State<FreeCrop> {
 
   @override
   Widget build(BuildContext context) {
+    void onChanged(Offset offset) {
+      // for prevent to null value and setState function
+      if (widget.onChanged != null) {
+        widget.onChanged!(offset);
+      }
+      // setState(() {
+      //   xPos = offset.dx;
+      //   yPos = offset.dy;
+      // });
+    }
+
+//This function related to GestureDetector.
+//This runs when user touch screen
+    void _handlePanStart(DragStartDetails details) {
+      print('User started drawing');
+      final box = context.findRenderObject() as RenderBox;
+      final point = box.globalToLocal(details.globalPosition);
+      onChanged(point);
+    }
+
+//this function runs crop future when user interaction ended.
+    void _handlePanEnd(DragEndDetails details) async {
+      image = await crop(cropperKey: cropperKey!);
+      setState(() {});
+    }
+
+    void _handlePanUpdate(DragUpdateDetails details) {
+      final box = context.findRenderObject() as RenderBox;
+      final point = box.globalToLocal(details.globalPosition);
+      onChanged(point);
+    }
+
+
     return Scaffold(
+      backgroundColor: Colors.red[100],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        bottomOpacity: 0,
+        actions: [ElevatedButton(onPressed: () async{
+          image = await crop(cropperKey: cropperKey!);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => ShowCroppedImage(image: image),));
+        }, child: const Text("save")),const SizedBox(width: 15,)],
+      ),
       body: Stack(
         children: [
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration:
-                BoxDecoration(color: Colors.grey[300], image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
-            child: ClipPath(
-              clipper: MyPainter(),
-              child: Container(
-                decoration: BoxDecoration(                color: Colors.grey.withOpacity(0.6),
-                border: Border.all(width: 2,color: Colors.black)),
+          RepaintBoundary(
+            key: cropperKey,
+            child: Container(
+              // height: MediaQuery.of(context).size.height,
+              // width: MediaQuery.of(context).size.width,
+              // decoration:
+              //     BoxDecoration(color: Colors.grey[300], image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
+              child: ClipPath(
+                clipper: MyPainter(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration:
+                  BoxDecoration(color: Colors.grey[300], image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
+                ),
               ),
             ),
           ),
