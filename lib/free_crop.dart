@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:ocr_image_cropping/show_croped_image.dart';
 
+const String imageURL = 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
+
 ///left top
 double px1 = 150;
 double py1 = 150;
@@ -33,15 +35,6 @@ double py7 = 300;
 double px8 = 450;
 double py8 = 150;
 
-class  extends StatelessWidget {
-  const ({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
-}
-
 
 class FreeCrop extends StatefulWidget {
   final ValueChanged<Offset>? onChanged;
@@ -53,10 +46,8 @@ class FreeCrop extends StatefulWidget {
 }
 
 class _FreeCropState extends State<FreeCrop> {
-  final String imageURL = 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
   GlobalKey? cropperKey = GlobalKey();
   Uint8List? image;
-
 
   Future<Uint8List?> crop({
     required GlobalKey cropperKey,
@@ -77,94 +68,48 @@ class _FreeCropState extends State<FreeCrop> {
 
   @override
   Widget build(BuildContext context) {
-    void onChanged(Offset offset) {
-      // for prevent to null value and setState function
-      if (widget.onChanged != null) {
-        widget.onChanged!(offset);
-      }
-      // setState(() {
-      //   xPos = offset.dx;
-      //   yPos = offset.dy;
-      // });
-    }
-
-//This function related to GestureDetector.
-//This runs when user touch screen
-    void _handlePanStart(DragStartDetails details) {
-      print('User started drawing');
-      final box = context.findRenderObject() as RenderBox;
-      final point = box.globalToLocal(details.globalPosition);
-      onChanged(point);
-    }
-
-//this function runs crop future when user interaction ended.
-    void _handlePanEnd(DragEndDetails details) async {
-      image = await crop(cropperKey: cropperKey!);
-      setState(() {});
-    }
-
-    void _handlePanUpdate(DragUpdateDetails details) {
-      final box = context.findRenderObject() as RenderBox;
-      final point = box.globalToLocal(details.globalPosition);
-      onChanged(point);
-    }
-
 
     return Scaffold(
       backgroundColor: Colors.red[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         bottomOpacity: 0,
-        actions: [ElevatedButton(onPressed: () async{
-          image = await crop(cropperKey: cropperKey!);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ShowCroppedImage(image: image),));
-        }, child: const Text("save")),const SizedBox(width: 15,)],
+        actions: [
+          ElevatedButton(
+              onPressed: () async {
+                image = await crop(cropperKey: cropperKey!);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShowCroppedImage(image: image),
+                    ));
+              },
+              child: const Text("save")),
+          const SizedBox(
+            width: 15,
+          )
+        ],
       ),
       body: Stack(
         children: [
-          RepaintBoundary(
-            key: cropperKey,
-            child: Container(
-              // height: MediaQuery.of(context).size.height,
-              // width: MediaQuery.of(context).size.width,
-              // decoration:
-              //     BoxDecoration(color: Colors.grey[300], image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
+          Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: const BoxDecoration(
+                image: DecorationImage(image: NetworkImage(imageURL), opacity: 0.5, fit: BoxFit.fill)),
+            child: RepaintBoundary(
+              key: cropperKey,
               child: ClipPath(
                 clipper: MyPainter(),
                 child: Container(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
-                  decoration:
-                  BoxDecoration(color: Colors.grey[300], image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
+                  decoration: const BoxDecoration(
+                     image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
                 ),
               ),
             ),
           ),
-
-          // CustomPaint(
-          //   painter:  MyPainter(p1: Offset(px1,py1), p2: Offset(px2,py2)),
-          // ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px2,py2), p2: Offset(px3,py3)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px3,py3), p2: Offset(px4,py4)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px4,py4), p2: Offset(px5,py5)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px5,py5), p2: Offset(px6,py6)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px6,py6), p2: Offset(px7,py7)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px7,py7), p2: Offset(px8,py8)),
-          //  ),
-          //  CustomPaint(
-          //    painter:  MyPainter(p1: Offset(px8,py8), p2: Offset(px1,py1)),
-          //  ),
 
           cropPoint(x: px1, y: py1, point: 1),
           cropPoint(x: px2, y: py2, point: 2),
@@ -184,49 +129,48 @@ class _FreeCropState extends State<FreeCrop> {
       left: x - 10,
       top: y - 10,
       child: Draggable(
-
         feedback: const CircleAvatar(radius: 10, backgroundColor: Colors.black87),
         childWhenDragging: Container(),
         onDragEnd: (details) {
           setState(() {
             if (point == 1) {
               px1 = details.offset.dx;
-              py1 = details.offset.dy;
+              py1 = details.offset.dy-60;
             }
 
             if (point == 2) {
               px2 = details.offset.dx;
-              py2 = details.offset.dy;
+              py2 = details.offset.dy-60;
             }
 
             if (point == 3) {
               px3 = details.offset.dx;
-              py3 = details.offset.dy;
+              py3 = details.offset.dy-60;
             }
 
             if (point == 4) {
               px4 = details.offset.dx;
-              py4 = details.offset.dy;
+              py4 = details.offset.dy-60;
             }
 
             if (point == 5) {
               px5 = details.offset.dx;
-              py5 = details.offset.dy;
+              py5 = details.offset.dy-60;
             }
 
             if (point == 6) {
               px6 = details.offset.dx;
-              py6 = details.offset.dy;
+              py6 = details.offset.dy-60;
             }
 
             if (point == 7) {
               px7 = details.offset.dx;
-              py7 = details.offset.dy;
+              py7 = details.offset.dy-60;
             }
 
             if (point == 8) {
               px8 = details.offset.dx;
-              py8 = details.offset.dy;
+              py8 = details.offset.dy-60;
             }
           });
         },
@@ -237,20 +181,6 @@ class _FreeCropState extends State<FreeCrop> {
 }
 
 class MyPainter extends CustomClipper<Path> {
-  // Offset p1;
-  // Offset p2;
-  // MyPainter({required this.p1, required this.p2});
-
-  // @override
-  // void paint(Canvas canvas, Size size) {
-  //   final paint = Paint()..color = Colors.black..strokeWidth = 2;
-  //   canvas.drawLine(p1, p2, paint);
-  // }
-  //
-  // @override
-  // bool shouldRepaint(covariant CustomPainter oldDelegate) {
-  //   return true;
-  // }
 
   @override
   Path getClip(Size size) {
@@ -265,6 +195,7 @@ class MyPainter extends CustomClipper<Path> {
       Offset(px7, py7),
       Offset(px8, py8)
     ], false);
+
     return path;
   }
 
