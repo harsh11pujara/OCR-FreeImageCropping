@@ -1,45 +1,46 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:ocr_image_cropping/pick_image.dart';
 import 'package:ocr_image_cropping/show_croped_image.dart';
 
 const String imageURL = 'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg';
 
 ///left top
-double px1 = 150;
-double py1 = 150;
+double px1 = 80;
+double py1 = PickImage.height/5 * 1;
 
-double px2 = 150;
-double py2 = 300;
+double px2 = 80;
+double py2 = PickImage.height/5 * 2;
 
-double px3 = 150;
-double py3 = 450;
+double px3 = 80;
+double py3 = PickImage.height/5 * 3;
 
 ///left bottom
-double px4 = 150;
-double py4 = 600;
+double px4 = 80;
+double py4 = PickImage.height/5 * 4;
 
 ///right bottom
-double px5 = 450;
-double py5 = 600;
+double px5 = PickImage.width - 80;
+double py5 = PickImage.height/5 * 4;
 
-double px6 = 450;
-double py6 = 450;
+double px6 = PickImage.width - 80;
+double py6 = PickImage.height/5 * 3;
 
-double px7 = 450;
-double py7 = 300;
+double px7 = PickImage.width - 80;
+double py7 = PickImage.height/5 * 2;
 
 ///right top
-double px8 = 450;
-double py8 = 150;
+double px8 = PickImage.width - 80;
+double py8 = PickImage.height/5 * 1;
 
 
 class FreeCrop extends StatefulWidget {
-  final ValueChanged<Offset>? onChanged;
-
-  const FreeCrop({Key? key, this.onChanged}) : super(key: key);
+  const FreeCrop({Key? key, required this.imageToCrop}) : super(key: key);
+  final File imageToCrop;
 
   @override
   State<FreeCrop> createState() => _FreeCropState();
@@ -70,7 +71,6 @@ class _FreeCropState extends State<FreeCrop> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Colors.red[100],
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         bottomOpacity: 0,
@@ -95,8 +95,8 @@ class _FreeCropState extends State<FreeCrop> {
           Container(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-                image: DecorationImage(image: NetworkImage(imageURL), opacity: 0.5, fit: BoxFit.fill)),
+            decoration: BoxDecoration(
+                image: DecorationImage(image: FileImage(widget.imageToCrop), opacity: 0.5, fit: BoxFit.fill)),
             child: RepaintBoundary(
               key: cropperKey,
               child: ClipPath(
@@ -104,8 +104,8 @@ class _FreeCropState extends State<FreeCrop> {
                 child: Container(
                   height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
-                  decoration: const BoxDecoration(
-                     image: DecorationImage(image: NetworkImage(imageURL), fit: BoxFit.fill)),
+                  decoration: BoxDecoration(
+                     image: DecorationImage(image: FileImage(widget.imageToCrop), fit: BoxFit.fill)),
                 ),
               ),
             ),
